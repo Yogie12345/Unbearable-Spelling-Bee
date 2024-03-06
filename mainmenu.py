@@ -1,5 +1,6 @@
 import pygame
 import sys
+from bear_maze.game import BearMazeGame
 
 pygame.init()
 
@@ -39,7 +40,9 @@ def drawText(text, font, color, rect):
     text_rect = text_surface.get_rect(center=rect.center)
     screen.blit(text_surface, text_rect)
 
-
+def start_game(): 
+  game = BearMazeGame()
+  game.run()
 
 running = True
 while running:
@@ -57,7 +60,7 @@ while running:
                 showPlayButton = False
                 showLogo = False 
             elif buttonFourth.collidepoint(event.pos):
-                gradeLevel = 4
+                start_game()
             elif buttonFifth.collidepoint(event.pos):
                 gradeLevel = 5
 
