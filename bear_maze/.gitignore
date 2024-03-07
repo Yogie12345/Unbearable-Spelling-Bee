@@ -12,3 +12,6 @@ venv.bak/
 
 # Python Virtual Envirnment Configuration
 pyvenv.cfg
+
+# PYC Files
+*.pyc
