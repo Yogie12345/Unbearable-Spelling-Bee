@@ -12,12 +12,14 @@ COLOR = "green"
 COLOR2 = "black"
 PI = math.pi
 BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bear_still.png'), (45,45))
+GRASS_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/grass_block.png'), (64,32))
+CAVE_SIGN_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/cave_sign.png'), (64,32))
 BEAR_START_X = 450
 BEAR_START_Y = 300
 TILE_HEIGHT = ((SCREEN_HEIGHT  - 50) // 32) # = 32
 TILE_WIDTH = (SCREEN_WIDTH // 30) # = 64
 C9_FUDGE_FACTOR = 32
-BEAR_SPEED = 32
+BEAR_SPEED = 8
 
 class BearMazeGame:
   def __init__(self): 
@@ -42,7 +44,11 @@ class BearMazeGame:
   def draw_maze(self, level):
     for i in range(len(level)):
       for j in range(len(level[i])):
-        if level[i][j] != 0:
+        if level[i][j] == 0:
+          self.screen.blit(GRASS_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+        elif level[i][j] == 2:
+          self.screen.blit(CAVE_SIGN_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+        else:
           pygame.draw.rect(self.screen, COLOR2, pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
   
   def draw_bear(self):
@@ -117,20 +123,21 @@ class BearMazeGame:
       for event in pygame.event.get():
         if event.type == pygame.QUIT: 
           self.running = False
-        if event.type == pygame.KEYDOWN:
-          if event.key == pygame.K_LEFT:
-            direction = 1
-          if event.key == pygame.K_UP:
-            direction = 2
-          if event.key == pygame.K_RIGHT:
-            direction = 0
-          if event.key == pygame.K_DOWN:
-            direction = 3
+    
+      keys = pygame.key.get_pressed()
+      if keys[pygame.K_LEFT]:
+        direction = 1
+      if keys[pygame.K_UP]:
+        direction = 2
+      if keys[pygame.K_RIGHT]:
+        direction = 0
+      if keys[pygame.K_DOWN]:
+        direction = 3
 
-        for i in range(len(turns_allowed)):
-          if direction == i and turns_allowed[i]:
-            self.direction = i
-            self.bear_x, self.bear_y = self.move_bear(self.bear_x, self.bear_y, turns_allowed)
+      for i in range(len(turns_allowed)):
+        if direction == i and turns_allowed[i]:
+          self.direction = i
+          self.bear_x, self.bear_y = self.move_bear(self.bear_x, self.bear_y, turns_allowed)
 
       pygame.display.flip()
     
