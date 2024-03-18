@@ -13,11 +13,24 @@ COLOR2 = "black"
 PI = math.pi
 BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bear_still.png'), (45,45))
 GRASS_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/grass_block.png'), (64,32))
+GRASS = 0
 CAVE_SIGN_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/cave_sign.png'), (64,32))
+CAVE_SIGN = 2
 ARROW_UP_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/w_arrow.png'), (64,32))
+ARROW_UP = 3
 ARROW_RIGHT_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/d_arrow.png'), (64,32))
+ARROW_RIGHT = 4
 ARROW_DOWN_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/s_arrow.png'), (64,32))
+ARROW_DOWN = 5
 ARROW_LEFT_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/a_arrow.png'), (64,32))
+ARROW_LEFT = 6
+OBSTACLE = 1
+UP = 2
+RIGHT = 0
+DOWN = 3
+LEFT = 1
+LEFT_MOUSE_BUTTON = 0
+CENTER_ADJUSTMENT = 23
 BEAR_START_X = 450
 BEAR_START_Y = 300
 TILE_HEIGHT = ((SCREEN_HEIGHT  - 50) // 32) # = 32
@@ -35,7 +48,9 @@ class BearMazeGame:
     self.running = True
     self.bear_x = BEAR_START_X
     self.bear_y = BEAR_START_Y
-    self.direction = 0
+    self.direction = RIGHT
+    # Order will always be U, L, R, D
+    self.clickable_arrow_keys = []
     # self.load_assests()  
     # self.initialize_game()
 
@@ -48,18 +63,22 @@ class BearMazeGame:
   def draw_maze(self, level):
     for i in range(len(level)):
       for j in range(len(level[i])):
-        if level[i][j] == 0:
+        if level[i][j] == GRASS:
           self.screen.blit(GRASS_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
-        elif level[i][j] == 2:
+        elif level[i][j] == CAVE_SIGN:
           self.screen.blit(CAVE_SIGN_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
-        elif level[i][j] == 3:
+        elif level[i][j] == ARROW_UP:
            self.screen.blit(ARROW_UP_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
-        elif level[i][j] == 4:
+           self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
+        elif level[i][j] == ARROW_RIGHT:
            self.screen.blit(ARROW_RIGHT_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
-        elif level[i][j] == 5:
+           self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
+        elif level[i][j] == ARROW_DOWN:
            self.screen.blit(ARROW_DOWN_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
-        elif level[i][j] == 6:
+           self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
+        elif level[i][j] == ARROW_LEFT:
             self.screen.blit(ARROW_LEFT_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+            self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
         else:
           pygame.draw.rect(self.screen, COLOR2, pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
   
@@ -71,40 +90,40 @@ class BearMazeGame:
     turns = [False, False, False, False]
     if self.center_x // TILE_WIDTH < 30 and self.center_x // TILE_WIDTH > 1:
       # If you're currently moving RIGHT, you should be able to move LEFT, back to your initial position
-      if self.direction == 0:
-        if level[self.center_y // TILE_HEIGHT][(self.center_x - TILE_WIDTH) // TILE_WIDTH] != 1:
+      if self.direction == RIGHT:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x - TILE_WIDTH) // TILE_WIDTH] != OBSTACLE:
           turns[1] = True
       # If you're currently moving LEFT, you should be able to move RIGHT, back to your initial position
-      if self.direction == 1:
-        if level[self.center_y // TILE_HEIGHT][(self.center_x + TILE_WIDTH) // TILE_WIDTH] != 1:
+      if self.direction == LEFT:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x + TILE_WIDTH) // TILE_WIDTH] != OBSTACLE:
           turns[0] = True
       # If you're currently moving UP, you should be able to move DOWN, back to your initial position
-      if self.direction == 2:
-        if level[(self.center_y + TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != 1:
+      if self.direction == UP:
+        if level[(self.center_y + TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
           turns[3] = True
       # If you're currently moving DOWN, you should be able to move UP, back to your initial position
-      if self.direction == 3:
-        if level[(self.center_y - TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != 1:
+      if self.direction == DOWN:
+        if level[(self.center_y - TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
           turns[2] = True
 
-      if self.direction == 2 or self.direction == 3:
-        if level[(self.center_y + C9_FUDGE_FACTOR) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != 1:
+      if self.direction == UP or self.direction == DOWN:
+        if level[(self.center_y + C9_FUDGE_FACTOR) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
           turns[3] = True
-        if level[(self.center_y - C9_FUDGE_FACTOR) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != 1:
+        if level[(self.center_y - C9_FUDGE_FACTOR) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
           turns[2] = True
-        if level[self.center_y // TILE_HEIGHT][(self.center_x - TILE_WIDTH) // TILE_WIDTH] != 1:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x - TILE_WIDTH) // TILE_WIDTH] != OBSTACLE:
           turns[1] = True
-        if level[self.center_y // TILE_HEIGHT][(self.center_x + TILE_WIDTH) // TILE_WIDTH] != 1:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x + TILE_WIDTH) // TILE_WIDTH] != OBSTACLE:
           turns[0] = True
 
-      if self.direction == 0 or self.direction == 1:
-        if level[(self.center_y + TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != 1:
+      if self.direction == RIGHT or self.direction == LEFT:
+        if level[(self.center_y + TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
           turns[3] = True
-        if level[(self.center_y - TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != 1:
+        if level[(self.center_y - TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
           turns[2] = True
-        if level[self.center_y // TILE_HEIGHT][(self.center_x - C9_FUDGE_FACTOR) // TILE_WIDTH] != 1:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x - C9_FUDGE_FACTOR) // TILE_WIDTH] != OBSTACLE:
           turns[1] = True
-        if level[self.center_y // TILE_HEIGHT][(self.center_x + C9_FUDGE_FACTOR) // TILE_WIDTH] != 1:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x + C9_FUDGE_FACTOR) // TILE_WIDTH] != OBSTACLE:
           turns[0] = True
     else:
       turns[0] = True
@@ -112,39 +131,51 @@ class BearMazeGame:
     return turns
 
   def move_bear(self, bear_x, bear_y, turns_allowed):
-    if self.direction == 0 and turns_allowed[0]:
+    if self.direction == RIGHT and turns_allowed[0]:
       bear_x += BEAR_SPEED
-    elif self.direction == 1 and turns_allowed[1]:
+    elif self.direction == LEFT and turns_allowed[1]:
       bear_x -= BEAR_SPEED
-    elif self.direction == 2 and turns_allowed[2]:
+    elif self.direction == UP and turns_allowed[2]:
       bear_y -= BEAR_SPEED
-    elif self.direction == 3 and turns_allowed[3]:
+    elif self.direction == DOWN and turns_allowed[3]:
       bear_y += BEAR_SPEED
     return bear_x, bear_y
     
   def run(self):
     while self.running:
-      direction = -1
+      direction = None
       self.timer.tick(FPS)
       self.screen.fill(COLOR)
       self.draw_maze(LEVEL)
       self.draw_bear()
-      self.center_x = self.bear_x + 23
-      self.center_y = self.bear_y + 23
+      self.center_x = self.bear_x + CENTER_ADJUSTMENT
+      self.center_y = self.bear_y + CENTER_ADJUSTMENT
       turns_allowed = self.check_position(LEVEL)
       for event in pygame.event.get():
         if event.type == pygame.QUIT: 
           self.running = False
-    
+
       keys = pygame.key.get_pressed()
       if keys[pygame.K_a]:
-        direction = 1
+        direction = LEFT
       if keys[pygame.K_w]:
-        direction = 2
+        direction = UP
       if keys[pygame.K_d]:
-        direction = 0
+        direction = RIGHT
       if keys[pygame.K_s]:
-        direction = 3
+        direction = DOWN
+      
+      mouse = pygame.mouse.get_pressed()
+      if mouse[LEFT_MOUSE_BUTTON]:
+        position = pygame.mouse.get_pos()
+        if self.clickable_arrow_keys[0].collidepoint(position):
+          direction = UP
+        elif self.clickable_arrow_keys[1].collidepoint(position):
+          direction = LEFT
+        elif self.clickable_arrow_keys[2].collidepoint(position):
+          direction = RIGHT
+        elif self.clickable_arrow_keys[3].collidepoint(position):
+          direction = DOWN
 
       for i in range(len(turns_allowed)):
         if direction == i and turns_allowed[i]:
