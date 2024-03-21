@@ -38,6 +38,8 @@ TILE_WIDTH = (SCREEN_WIDTH // 30) # = 64
 C9_FUDGE_FACTOR = 32
 BEAR_SPEED = 8
 
+ENEMY_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bee.png'), (30,30))
+
 class BearMazeGame:
   def __init__(self): 
     pygame.init()
@@ -84,6 +86,9 @@ class BearMazeGame:
   
   def draw_bear(self):
     self.screen.blit(BEAR_IMAGE, (self.bear_x, self.bear_y))
+
+  def draw_enemies(self):
+    self.screen.blit(ENEMY_IMAGE, (self.bear_x + 150, self.bear_y))
     
   def check_position(self, level):
     # R, L, U, D
@@ -148,6 +153,7 @@ class BearMazeGame:
       self.screen.fill(COLOR)
       self.draw_maze(LEVEL)
       self.draw_bear()
+      self.draw_enemies()
       self.center_x = self.bear_x + CENTER_ADJUSTMENT
       self.center_y = self.bear_y + CENTER_ADJUSTMENT
       turns_allowed = self.check_position(LEVEL)
