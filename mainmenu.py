@@ -14,6 +14,8 @@ textColor = (255,255,255)
 buttonBackgroundColor = (0,0,0)
 buttonWidth = 200
 buttonHeight= 50
+STARTING_NUMBER_OF_BEES = 3
+STARTING_NUMBER_OF_HONEY_JARS = 3
 
 
 gradelevel = 4
@@ -41,7 +43,7 @@ def drawText(text, font, color, rect):
     screen.blit(text_surface, text_rect)
 
 def start_game(): 
-  game = BearMazeGame()
+  game = BearMazeGame(STARTING_NUMBER_OF_BEES, STARTING_NUMBER_OF_HONEY_JARS)
   game.run()
 
 running = True

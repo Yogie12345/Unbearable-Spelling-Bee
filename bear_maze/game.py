@@ -3,6 +3,7 @@ from PIL import Image, ImageEnhance
 import os
 import math
 from bear_maze.maze import mazes
+# from spelling_bee.game import SpellingBeeGame
 
 SCREEN_HEIGHT = 1080
 SCREEN_WIDTH = 1920
@@ -48,7 +49,7 @@ BRIGHTNESS_FACTOR = 0.5
 ENEMY_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bee.png'), (30,30))
 
 class BearMazeGame:
-  def __init__(self): 
+  def __init__(self, number_of_bees, number_of_honey_jars): 
     pygame.init()
     self.screen_width = SCREEN_HEIGHT
     self.screen_height = SCREEN_WIDTH
@@ -57,11 +58,16 @@ class BearMazeGame:
     self.running = True
     self.bear_x = BEAR_START_X
     self.bear_y = BEAR_START_Y
+    # Starting direction for bear
     self.direction = RIGHT
+    # Game state will be either "playing", "won", or "lost"
+    self.game_state = "playing"
     # Order will always be U, L, R, D
     self.clickable_arrow_keys = []
+    self.goal_tile = []
+    self.number_of_bees = number_of_bees
+    self.number_of_honey_jars = number_of_honey_jars
     # self.load_assests()  
-    # self.initialize_game()
 
   def load_assests(self):
     print("load assets") 
@@ -76,6 +82,7 @@ class BearMazeGame:
           self.screen.blit(GRASS_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
         elif level[i][j] == CAVE_SIGN:
           self.screen.blit(CAVE_SIGN_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+          self.goal_tile.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
         elif level[i][j] == ARROW_UP:
            self.screen.blit(ARROW_UP_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
            self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
@@ -100,6 +107,8 @@ class BearMazeGame:
   def check_position(self, level):
     # R, L, U, D
     turns = [False, False, False, False]
+    if self.goal_tile[0].collidepoint(self.center_x, self.center_y):
+      print("You win")
     if self.center_x // TILE_WIDTH < 30 and self.center_x // TILE_WIDTH > 1:
       # If you're currently moving RIGHT, you should be able to move LEFT, back to your initial position
       if self.direction == RIGHT:
