@@ -92,7 +92,7 @@ def draw_difficulty_selection():
   screen.fill(backgroundColor)
   
   title_surf = titleFont.render("SELECT DIFFICULTY", True, (0, 0, 0))
-  title_rect = title_surf.get_rect(center=(screenWidth // 2, 100))
+  title_rect = title_surf.get_rect(center=(screenWidth // 2, 300))
   screen.blit(title_surf, title_rect)
   
   mouse_x, mouse_y = pygame.mouse.get_pos()
