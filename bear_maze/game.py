@@ -1,4 +1,5 @@
 import pygame
+from PIL import Image, ImageEnhance
 import os
 import math
 from bear_maze.maze import mazes
@@ -18,12 +19,16 @@ GRASS = 0
 CAVE_SIGN_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/cave_sign.png'), (64,32))
 CAVE_SIGN = 2
 ARROW_UP_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/w_arrow.png'), (64,32))
+DARK_ARROW_UP_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/dark_w_arrow.png'), (64,32))
 ARROW_UP = 3
 ARROW_RIGHT_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/d_arrow.png'), (64,32))
+DARK_ARROW_RIGHT_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/dark_d_arrow.png'), (64,32))
 ARROW_RIGHT = 4
 ARROW_DOWN_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/s_arrow.png'), (64,32))
+DARK_ARROW_DOWN_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/dark_s_arrow.png'), (64,32))
 ARROW_DOWN = 5
 ARROW_LEFT_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/a_arrow.png'), (64,32))
+DARK_ARROW_LEFT_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/dark_a_arrow.png'), (64,32))
 ARROW_LEFT = 6
 OBSTACLE = 1
 UP = 2
@@ -38,6 +43,7 @@ TILE_HEIGHT = ((SCREEN_HEIGHT  - 50) // 32) # = 32
 TILE_WIDTH = (SCREEN_WIDTH // 30) # = 64
 C9_FUDGE_FACTOR = 32
 BEAR_SPEED = 8
+BRIGHTNESS_FACTOR = 0.5
 
 ENEMY_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bee.png'), (30,30))
 
@@ -161,43 +167,35 @@ class BearMazeGame:
       for event in pygame.event.get():
         if event.type == pygame.QUIT: 
           self.running = False
-
+      
       keys = pygame.key.get_pressed()
       if keys[pygame.K_w]:
-        pygame.draw.rect(self.screen, SECONDARY_COLOR, self.clickable_arrow_keys[0])
-        self.screen.blit(ARROW_UP_IMAGE, (self.clickable_arrow_keys[0].left, self.clickable_arrow_keys[0].top))
+        self.screen.blit(DARK_ARROW_UP_IMAGE, (self.clickable_arrow_keys[0].left, self.clickable_arrow_keys[0].top))
         direction = UP
       if keys[pygame.K_a]:
-        pygame.draw.rect(self.screen, SECONDARY_COLOR, self.clickable_arrow_keys[1])
-        self.screen.blit(ARROW_LEFT_IMAGE, (self.clickable_arrow_keys[1].left, self.clickable_arrow_keys[1].top))
+        self.screen.blit(DARK_ARROW_LEFT_IMAGE, (self.clickable_arrow_keys[1].left, self.clickable_arrow_keys[1].top))
         direction = LEFT
       if keys[pygame.K_d]:
-        pygame.draw.rect(self.screen, SECONDARY_COLOR, self.clickable_arrow_keys[2])
-        self.screen.blit(ARROW_RIGHT_IMAGE, (self.clickable_arrow_keys[2].left, self.clickable_arrow_keys[2].top))
+        self.screen.blit(DARK_ARROW_RIGHT_IMAGE, (self.clickable_arrow_keys[2].left, self.clickable_arrow_keys[2].top))
         direction = RIGHT
       if keys[pygame.K_s]:
-        pygame.draw.rect(self.screen, SECONDARY_COLOR, self.clickable_arrow_keys[3])
-        self.screen.blit(ARROW_DOWN_IMAGE, (self.clickable_arrow_keys[3].left, self.clickable_arrow_keys[3].top))
+        self.screen.blit(DARK_ARROW_DOWN_IMAGE, (self.clickable_arrow_keys[3].left, self.clickable_arrow_keys[3].top))
         direction = DOWN
       
       mouse = pygame.mouse.get_pressed()
       if mouse[LEFT_MOUSE_BUTTON]:
         position = pygame.mouse.get_pos()
         if self.clickable_arrow_keys[0].collidepoint(position):
-          pygame.draw.rect(self.screen, SECONDARY_COLOR, self.clickable_arrow_keys[0])
-          self.screen.blit(ARROW_UP_IMAGE, (self.clickable_arrow_keys[0].left, self.clickable_arrow_keys[0].top))
+          self.screen.blit(DARK_ARROW_UP_IMAGE, (self.clickable_arrow_keys[0].left, self.clickable_arrow_keys[0].top))
           direction = UP
         elif self.clickable_arrow_keys[1].collidepoint(position):
-          pygame.draw.rect(self.screen, SECONDARY_COLOR, self.clickable_arrow_keys[1])
-          self.screen.blit(ARROW_LEFT_IMAGE, (self.clickable_arrow_keys[1].left, self.clickable_arrow_keys[1].top))
+          self.screen.blit(DARK_ARROW_LEFT_IMAGE, (self.clickable_arrow_keys[1].left, self.clickable_arrow_keys[1].top))
           direction = LEFT
         elif self.clickable_arrow_keys[2].collidepoint(position):
-          pygame.draw.rect(self.screen, SECONDARY_COLOR, self.clickable_arrow_keys[2])
-          self.screen.blit(ARROW_RIGHT_IMAGE, (self.clickable_arrow_keys[2].left, self.clickable_arrow_keys[2].top))
+          self.screen.blit(DARK_ARROW_RIGHT_IMAGE, (self.clickable_arrow_keys[2].left, self.clickable_arrow_keys[2].top))
           direction = RIGHT
         elif self.clickable_arrow_keys[3].collidepoint(position):
-          pygame.draw.rect(self.screen, SECONDARY_COLOR, self.clickable_arrow_keys[3])
-          self.screen.blit(ARROW_DOWN_IMAGE, (self.clickable_arrow_keys[3].left, self.clickable_arrow_keys[3].top))
+          self.screen.blit(DARK_ARROW_DOWN_IMAGE, (self.clickable_arrow_keys[3].left, self.clickable_arrow_keys[3].top))
           direction = DOWN
 
       for i in range(len(turns_allowed)):
