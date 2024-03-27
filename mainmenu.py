@@ -47,7 +47,7 @@ def scale_and_position_elements(screenWidth, screen_height):
   logo_x = (screenWidth - scaled_logo.get_width())// 2
   logo_y = (screen_height - scaled_logo.get_height()- 100 - BUTTON_HEIGHT * 2) // 2
   start_button_x = (screenWidth - BUTTON_WIDTH)//2
-  start_button_y = logo_y + scaled_logo.get_height()+20
+  start_button_y = logo_y + scaled_logo.get_height()
 
   quit_button_x = (screenWidth - BUTTON_WIDTH)//2
   quit_button_y = start_button_y + BUTTON_HEIGHT+10
@@ -62,7 +62,7 @@ def scale_and_position_elements(screenWidth, screen_height):
   hard_button_y = screen_height //2
 
   back_button_x = screenWidth // 2 - BUTTON_WIDTH // 2
-  back_button_y = screen_height -BUTTON_HEIGHT- 20  
+  back_button_y = screen_height -BUTTON_HEIGHT- 250  
   
   return scaled_logo, logo_x, logo_y, start_button_x, start_button_y, quit_button_x, quit_button_y, easy_button_x, easy_button_y, hard_button_x, hard_button_y, back_button_x, back_button_y
 
