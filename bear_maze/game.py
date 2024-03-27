@@ -60,8 +60,6 @@ class BearMazeGame:
     self.bear_y = BEAR_START_Y
     # Starting direction for bear
     self.direction = RIGHT
-    # Game state will be either "playing", "won", or "lost"
-    self.game_state = "playing"
     # Order will always be U, L, R, D
     self.clickable_arrow_keys = []
     self.goal_tile = []
@@ -104,11 +102,17 @@ class BearMazeGame:
   def draw_enemies(self):
     self.screen.blit(ENEMY_IMAGE, (self.bear_x + 150, self.bear_y))
     
+  def end_game(self, game_state):
+    if game_state == "won":
+      print("you win")
+    elif game_state == "lost":
+      print("you lose")
+    
   def check_position(self, level):
     # R, L, U, D
     turns = [False, False, False, False]
     if self.goal_tile[0].collidepoint(self.center_x, self.center_y):
-      print("You win")
+      self.end_game("won")
     if self.center_x // TILE_WIDTH < 30 and self.center_x // TILE_WIDTH > 1:
       # If you're currently moving RIGHT, you should be able to move LEFT, back to your initial position
       if self.direction == RIGHT:
