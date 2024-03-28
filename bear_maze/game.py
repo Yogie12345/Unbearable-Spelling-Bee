@@ -3,6 +3,7 @@ from PIL import Image, ImageEnhance
 import os
 import math
 from bear_maze.maze import mazes
+import random
 # from spelling_bee.game import SpellingBeeGame
 
 SCREEN_HEIGHT = 1080
@@ -47,6 +48,29 @@ BEAR_SPEED = 8
 BRIGHTNESS_FACTOR = 0.5
 
 ENEMY_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bee.png'), (30,30))
+FLIPPED_ENEMY_IMAGE = pygame.transform.flip(ENEMY_IMAGE, True, False)
+
+class Bee:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.speed = 3 
+        self.movingRight = True  # Initialize moving direction
+
+    def move(self):
+      # Check if the object should move right
+      if self.movingRight:
+        # Check if the object is within the right limit
+        if self.x < SCREEN_WIDTH - 300:
+          self.x += self.speed  # Move right
+        else:
+          self.movingRight = False  # Change direction to left
+      else:
+        # Check if the object is within the left limit
+        if self.x > 350:
+          self.x -= self.speed  # Move left
+        else:
+          self.movingRight = True  # Change direction to right
 
 class BearMazeGame:
   def __init__(self, number_of_bees, number_of_honey_jars): 
@@ -65,7 +89,14 @@ class BearMazeGame:
     self.goal_tile = []
     self.number_of_bees = number_of_bees
     self.number_of_honey_jars = number_of_honey_jars
-    # self.load_assests()  
+    # self.load_assests()
+    self.bees = []  # List to hold bee objects
+    self.create_bees(number_of_bees)  # Spawn bees 
+
+    # Create Rect object for bear
+    self.bear_rect = pygame.Rect(self.bear_x, self.bear_y, BEAR_IMAGE.get_width(), BEAR_IMAGE.get_height())
+    # Create Rect objects for bees
+    self.bee_rects = [pygame.Rect(bee.x, bee.y, ENEMY_IMAGE.get_width(), ENEMY_IMAGE.get_height()) for bee in self.bees] 
 
   def load_assests(self):
     print("load assets") 
@@ -101,7 +132,45 @@ class BearMazeGame:
 
   def draw_enemies(self):
     self.screen.blit(ENEMY_IMAGE, (self.bear_x + 150, self.bear_y))
-    
+
+  def create_bees(self, number_of_bees):
+        # Spwan bees at random locations
+        number_of_bees = 4
+        for _ in range(number_of_bees):
+          random_x = random.randint(400, 800) 
+          random_y = random.randint(200, 800) 
+          bee = Bee(random_x, random_y)
+          self.bees.append(bee)
+  
+  def update_bees_position(self):
+        for bee in self.bees:
+          bee.move()  # Update bee positions based on their movement logic
+  
+  def draw_bees(self):
+        for bee in self.bees:
+            if bee.movingRight:
+              self.screen.blit(ENEMY_IMAGE, (bee.x, bee.y))
+            else:
+              self.screen.blit(FLIPPED_ENEMY_IMAGE, (bee.x, bee.y))
+
+  def check_collisions(self):
+        # Check collisions between bear and bees
+        for bee_rect in self.bee_rects:
+            if self.bear_rect.colliderect(bee_rect):
+                # Collision actions here
+                print("Bear collided with a bee!")
+                # Maybe: Remove bee from the list
+                bee_index = self.bee_rects.index(bee_rect)
+                del self.bees[bee_index]
+                del self.bee_rects[bee_index]
+                # decrease honey jar number
+                self.number_of_honey_jars -= 1
+                print(self.number_of_honey_jars)
+                # change this later to make it pop up U LOSE or some shit
+                if (self.number_of_honey_jars <= 0):
+                  pygame.quit()
+            
+
   def end_game(self, game_state):
     if game_state == "won":
       print("you win")
@@ -174,6 +243,15 @@ class BearMazeGame:
       self.draw_maze(LEVEL)
       self.draw_bear()
       self.draw_enemies()
+      self.update_bees_position()
+      self.draw_bees()
+      # Update bear and bee Rect objects
+      self.bear_rect.update(self.bear_x, self.bear_y, BEAR_IMAGE.get_width(), BEAR_IMAGE.get_height())
+      self.bee_rects = [pygame.Rect(bee.x, bee.y, ENEMY_IMAGE.get_width(), ENEMY_IMAGE.get_height()) for bee in self.bees]
+
+      # Check collisions
+      self.check_collisions()
+
       self.center_x = self.bear_x + CENTER_ADJUSTMENT
       self.center_y = self.bear_y + CENTER_ADJUSTMENT
       turns_allowed = self.check_position(LEVEL)
