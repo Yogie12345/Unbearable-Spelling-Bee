@@ -16,6 +16,7 @@ SECONDARY_COLOR = "chartreuse4"
 COLOR2 = "black"
 PI = math.pi
 BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bear_still.png'), (45,45))
+ANGRY_BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/angry_bear.png'), (45,45))
 GRASS_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/grass_block.png'), (64,32))
 GRASS = 0
 CAVE_SIGN_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/cave_sign.png'), (64,32))
@@ -45,16 +46,17 @@ TILE_HEIGHT = ((SCREEN_HEIGHT  - 50) // 32) # = 32
 TILE_WIDTH = (SCREEN_WIDTH // 30) # = 64
 C9_FUDGE_FACTOR = 32
 BEAR_SPEED = 8
+BEE_SPEED = 5
 BRIGHTNESS_FACTOR = 0.5
 
-ENEMY_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bee.png'), (30,30))
+ENEMY_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/angry_bee.png'), (30,30))
 FLIPPED_ENEMY_IMAGE = pygame.transform.flip(ENEMY_IMAGE, True, False)
 
 class Bee:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.speed = 3 
+        self.speed = BEE_SPEED
         self.movingRight = True  # Initialize moving direction
 
     def move(self):
@@ -90,8 +92,10 @@ class BearMazeGame:
     self.number_of_bees = number_of_bees
     self.number_of_honey_jars = number_of_honey_jars
     # self.load_assests()
-    self.bees = []  # List to hold bee objects
-    self.create_bees(number_of_bees)  # Spawn bees 
+    # List to hold bee objects
+    self.bees = []
+    # Spawn bees at initial positon
+    self.create_bees(number_of_bees)
 
     # Create Rect object for bear
     self.bear_rect = pygame.Rect(self.bear_x, self.bear_y, BEAR_IMAGE.get_width(), BEAR_IMAGE.get_height())
@@ -130,45 +134,41 @@ class BearMazeGame:
   def draw_bear(self):
     self.screen.blit(BEAR_IMAGE, (self.bear_x, self.bear_y))
 
-  def draw_enemies(self):
-    self.screen.blit(ENEMY_IMAGE, (self.bear_x + 150, self.bear_y))
-
   def create_bees(self, number_of_bees):
-        # Spwan bees at random locations
-        number_of_bees = 4
-        for _ in range(number_of_bees):
-          random_x = random.randint(400, 800) 
-          random_y = random.randint(200, 800) 
-          bee = Bee(random_x, random_y)
-          self.bees.append(bee)
+    # Spwan bees at random locations
+    number_of_bees = 4
+    for _ in range(number_of_bees):
+      random_x = random.randint(400, 1000) 
+      random_y = random.randint(200, 800) 
+      bee = Bee(random_x, random_y)
+      self.bees.append(bee)
   
   def update_bees_position(self):
-        for bee in self.bees:
-          bee.move()  # Update bee positions based on their movement logic
-  
+    for bee in self.bees:
+      bee.move()  # Update bee positions based on their movement logic
+
   def draw_bees(self):
-        for bee in self.bees:
-            if bee.movingRight:
-              self.screen.blit(ENEMY_IMAGE, (bee.x, bee.y))
-            else:
-              self.screen.blit(FLIPPED_ENEMY_IMAGE, (bee.x, bee.y))
+    for bee in self.bees:
+      if bee.movingRight:
+        self.screen.blit(ENEMY_IMAGE, (bee.x, bee.y))
+      else:
+        self.screen.blit(FLIPPED_ENEMY_IMAGE, (bee.x, bee.y))
 
   def check_collisions(self):
-        # Check collisions between bear and bees
-        for bee_rect in self.bee_rects:
-            if self.bear_rect.colliderect(bee_rect):
-                # Collision actions here
-                print("Bear collided with a bee!")
-                # Maybe: Remove bee from the list
-                bee_index = self.bee_rects.index(bee_rect)
-                del self.bees[bee_index]
-                del self.bee_rects[bee_index]
-                # decrease honey jar number
-                self.number_of_honey_jars -= 1
-                print(self.number_of_honey_jars)
-                # change this later to make it pop up U LOSE or some shit
-                if (self.number_of_honey_jars <= 0):
-                  pygame.quit()
+    # Check collisions between bear and bees
+    for bee_rect in self.bee_rects:
+      if self.bear_rect.colliderect(bee_rect):
+        # Collision actions here
+        print("Bear collided with a bee!")
+        # Maybe: Remove bee from the list
+        bee_index = self.bee_rects.index(bee_rect)
+        del self.bees[bee_index]
+        del self.bee_rects[bee_index]
+        # decrease honey jar number
+        self.number_of_honey_jars -= 1
+        print(self.number_of_honey_jars)
+        if (self.number_of_honey_jars <= 0):
+          self.end_game("lost")
             
 
   def end_game(self, game_state):
@@ -242,7 +242,6 @@ class BearMazeGame:
       self.screen.fill(COLOR)
       self.draw_maze(LEVEL)
       self.draw_bear()
-      self.draw_enemies()
       self.update_bees_position()
       self.draw_bees()
       # Update bear and bee Rect objects
