@@ -6,7 +6,7 @@ import time
 
 SCREEN_HEIGHT = 1080
 SCREEN_WIDTH = 1920
-FONT_SIZE = 24
+FONT_SIZE = 36
 FPS = 60
 LEVEL = mazes
 COLOR = "chartreuse3"
@@ -56,8 +56,6 @@ TILE_WIDTH = (SCREEN_WIDTH // 30) # = 64
 C9_FUDGE_FACTOR = 32
 BEAR_SPEED = 10
 BEE_SPEED = 7
-BRIGHTNESS_FACTOR = 0.5
-
 ENEMY_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/angry_bee.png'), (30,30))
 FLIPPED_ENEMY_IMAGE = pygame.transform.flip(ENEMY_IMAGE, True, False)
 
@@ -102,7 +100,7 @@ class BearMazeGame:
     self.number_of_honey_jars = number_of_honey_jars
     # List to hold bee objects
     self.bees = []
-    # Spawn bees at initial positon
+    # Spawn bees at initial position
     self.create_bees(number_of_bees)
     # Create Rect object for bear
     self.bear_rect = pygame.Rect(self.bear_x, self.bear_y, BEAR_IMAGE.get_width(), BEAR_IMAGE.get_height())
@@ -256,7 +254,7 @@ class BearMazeGame:
     jar_msg = f"Number of Jars: {self.number_of_honey_jars}"
     bee_msg = f"Number of Bees: {self.number_of_bees}"
     
-    font = pygame.font.Font(None, 36)
+    font = pygame.font.Font(None, FONT_SIZE)
     
     jar_surface = font.render(jar_msg, True, (0, 0, 0))
     bee_surface = font.render(bee_msg, True, (0, 0, 0))
