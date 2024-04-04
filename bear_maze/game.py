@@ -19,6 +19,17 @@ BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_image
 ANGRY_BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/angry_bear.png'), (45,45))
 GRASS_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/grass_block.png'), (64,32))
 GRASS = 0
+V1_ROCK_OBSTACLE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/rock_obstacle_1.png'), (64,32))
+V2_ROCK_OBSTACLE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/rock_obstacle_2.png'), (64,32))
+V3_ROCK_OBSTACLE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/rock_obstacle_3.png'), (64,32))
+BUSH_OBSTACLE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bush_obstacle_1.png'), (64,32))
+WOOD_LOG_OBSTACLE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/wood_log_obstacle.png'), (64,32))
+V1_ROCK_OBSTACLE = 7
+V2_ROCK_OBSTACLE = 8
+V3_ROCK_OBSTACLE = 9
+BUSH_OBSTACLE = 10
+WOOD_LOG_OBSTACLE = 11
+OBSTACLE = [V1_ROCK_OBSTACLE, V2_ROCK_OBSTACLE, V3_ROCK_OBSTACLE, BUSH_OBSTACLE, WOOD_LOG_OBSTACLE]
 CAVE_SIGN_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/cave_sign.png'), (64,32))
 CAVE_SIGN = 2
 ARROW_UP_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/w_arrow.png'), (64,32))
@@ -33,7 +44,6 @@ ARROW_DOWN = 5
 ARROW_LEFT_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/a_arrow.png'), (64,32))
 DARK_ARROW_LEFT_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/dark_a_arrow.png'), (64,32))
 ARROW_LEFT = 6
-OBSTACLE = 1
 UP = 2
 RIGHT = 0
 DOWN = 3
@@ -96,7 +106,6 @@ class BearMazeGame:
     self.bees = []
     # Spawn bees at initial positon
     self.create_bees(number_of_bees)
-
     # Create Rect object for bear
     self.bear_rect = pygame.Rect(self.bear_x, self.bear_y, BEAR_IMAGE.get_width(), BEAR_IMAGE.get_height())
     # Create Rect objects for bees
@@ -128,9 +137,17 @@ class BearMazeGame:
         elif level[i][j] == ARROW_LEFT:
             self.screen.blit(ARROW_LEFT_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
             self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
-        else:
-          pygame.draw.rect(self.screen, COLOR2, pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
-  
+        elif level[i][j] == V1_ROCK_OBSTACLE:
+          self.screen.blit(V1_ROCK_OBSTACLE_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+        elif level[i][j] == V2_ROCK_OBSTACLE:
+          self.screen.blit(V2_ROCK_OBSTACLE_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+        elif level[i][j] == V3_ROCK_OBSTACLE:
+          self.screen.blit(V3_ROCK_OBSTACLE_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+        elif level[i][j] == BUSH_OBSTACLE:
+          self.screen.blit(BUSH_OBSTACLE_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+        elif level[i][j] == WOOD_LOG_OBSTACLE:
+          self.screen.blit(WOOD_LOG_OBSTACLE_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+        
   def draw_bear(self):
     self.screen.blit(BEAR_IMAGE, (self.bear_x, self.bear_y))
 
@@ -185,39 +202,39 @@ class BearMazeGame:
     if self.center_x // TILE_WIDTH < 30 and self.center_x // TILE_WIDTH > 1:
       # If you're currently moving RIGHT, you should be able to move LEFT, back to your initial position
       if self.direction == RIGHT:
-        if level[self.center_y // TILE_HEIGHT][(self.center_x - TILE_WIDTH) // TILE_WIDTH] != OBSTACLE:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x - TILE_WIDTH) // TILE_WIDTH] not in OBSTACLE:
           turns[1] = True
       # If you're currently moving LEFT, you should be able to move RIGHT, back to your initial position
       if self.direction == LEFT:
-        if level[self.center_y // TILE_HEIGHT][(self.center_x + TILE_WIDTH) // TILE_WIDTH] != OBSTACLE:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x + TILE_WIDTH) // TILE_WIDTH] not in OBSTACLE:
           turns[0] = True
       # If you're currently moving UP, you should be able to move DOWN, back to your initial position
       if self.direction == UP:
-        if level[(self.center_y + TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
+        if level[(self.center_y + TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] not in OBSTACLE:
           turns[3] = True
       # If you're currently moving DOWN, you should be able to move UP, back to your initial position
       if self.direction == DOWN:
-        if level[(self.center_y - TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
+        if level[(self.center_y - TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] not in OBSTACLE:
           turns[2] = True
 
       if self.direction == UP or self.direction == DOWN:
-        if level[(self.center_y + C9_FUDGE_FACTOR) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
+        if level[(self.center_y + C9_FUDGE_FACTOR) // TILE_HEIGHT][self.center_x // TILE_WIDTH] not in OBSTACLE:
           turns[3] = True
-        if level[(self.center_y - C9_FUDGE_FACTOR) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
+        if level[(self.center_y - C9_FUDGE_FACTOR) // TILE_HEIGHT][self.center_x // TILE_WIDTH] not in OBSTACLE:
           turns[2] = True
-        if level[self.center_y // TILE_HEIGHT][(self.center_x - TILE_WIDTH) // TILE_WIDTH] != OBSTACLE:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x - TILE_WIDTH) // TILE_WIDTH] not in OBSTACLE:
           turns[1] = True
-        if level[self.center_y // TILE_HEIGHT][(self.center_x + TILE_WIDTH) // TILE_WIDTH] != OBSTACLE:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x + TILE_WIDTH) // TILE_WIDTH] not in OBSTACLE:
           turns[0] = True
 
       if self.direction == RIGHT or self.direction == LEFT:
-        if level[(self.center_y + TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
+        if level[(self.center_y + TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] not in OBSTACLE:
           turns[3] = True
-        if level[(self.center_y - TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] != OBSTACLE:
+        if level[(self.center_y - TILE_HEIGHT) // TILE_HEIGHT][self.center_x // TILE_WIDTH] not in OBSTACLE:
           turns[2] = True
-        if level[self.center_y // TILE_HEIGHT][(self.center_x - C9_FUDGE_FACTOR) // TILE_WIDTH] != OBSTACLE:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x - C9_FUDGE_FACTOR) // TILE_WIDTH] not in OBSTACLE:
           turns[1] = True
-        if level[self.center_y // TILE_HEIGHT][(self.center_x + C9_FUDGE_FACTOR) // TILE_WIDTH] != OBSTACLE:
+        if level[self.center_y // TILE_HEIGHT][(self.center_x + C9_FUDGE_FACTOR) // TILE_WIDTH] not in OBSTACLE:
           turns[0] = True
     else:
       turns[0] = True
