@@ -4,6 +4,7 @@ import os
 import math
 from bear_maze.maze import mazes
 import random
+import time
 # from spelling_bee.game import SpellingBeeGame
 
 SCREEN_HEIGHT = 1080
@@ -17,6 +18,7 @@ COLOR2 = "black"
 PI = math.pi
 BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bear_still.png'), (45,45))
 ANGRY_BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/angry_bear.png'), (45,45))
+MINUS_ONE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/minus_one.png'), (45,45))
 GRASS_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/grass_block.png'), (64,32))
 GRASS = 0
 V1_ROCK_OBSTACLE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/rock_obstacle_1.png'), (64,32))
@@ -29,6 +31,7 @@ V2_ROCK_OBSTACLE = 8
 V3_ROCK_OBSTACLE = 9
 BUSH_OBSTACLE = 10
 WOOD_LOG_OBSTACLE = 11
+MENU_SCREEN = 12
 OBSTACLE = [V1_ROCK_OBSTACLE, V2_ROCK_OBSTACLE, V3_ROCK_OBSTACLE, BUSH_OBSTACLE, WOOD_LOG_OBSTACLE]
 CAVE_SIGN_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/cave_sign.png'), (64,32))
 CAVE_SIGN = 2
@@ -109,7 +112,9 @@ class BearMazeGame:
     # Create Rect object for bear
     self.bear_rect = pygame.Rect(self.bear_x, self.bear_y, BEAR_IMAGE.get_width(), BEAR_IMAGE.get_height())
     # Create Rect objects for bees
-    self.bee_rects = [pygame.Rect(bee.x, bee.y, ENEMY_IMAGE.get_width(), ENEMY_IMAGE.get_height()) for bee in self.bees] 
+    self.bee_rects = [pygame.Rect(bee.x, bee.y, ENEMY_IMAGE.get_width(), ENEMY_IMAGE.get_height()) for bee in self.bees]
+    self.angry_timer = 0
+    self.angry_duration = 3
 
   def load_assests(self):
     print("load assets") 
@@ -147,9 +152,15 @@ class BearMazeGame:
           self.screen.blit(BUSH_OBSTACLE_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
         elif level[i][j] == WOOD_LOG_OBSTACLE:
           self.screen.blit(WOOD_LOG_OBSTACLE_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+        elif level[i][j] == MENU_SCREEN:
+          pygame.draw.rect(self.screen, COLOR2, pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
         
   def draw_bear(self):
-    self.screen.blit(BEAR_IMAGE, (self.bear_x, self.bear_y))
+    if time.time() - self.angry_timer < self.angry_duration:
+      self.screen.blit(MINUS_ONE_IMAGE, (self.bear_x, self.bear_y - MINUS_ONE_IMAGE.get_height()))
+      self.screen.blit(ANGRY_BEAR_IMAGE, (self.bear_x, self.bear_y))
+    else:
+      self.screen.blit(BEAR_IMAGE, (self.bear_x, self.bear_y))
 
   def create_bees(self, number_of_bees):
     # Spwan bees at random locations
@@ -176,13 +187,12 @@ class BearMazeGame:
     for bee_rect in self.bee_rects:
       if self.bear_rect.colliderect(bee_rect):
         # Collision actions here
-        print("Bear collided with a bee!")
-        # Maybe: Remove bee from the list
         bee_index = self.bee_rects.index(bee_rect)
         del self.bees[bee_index]
         del self.bee_rects[bee_index]
         # decrease honey jar number
         self.number_of_honey_jars -= 1
+        self.angry_timer = time.time()
         print(self.number_of_honey_jars)
         if (self.number_of_honey_jars <= 0):
           self.end_game("lost")
