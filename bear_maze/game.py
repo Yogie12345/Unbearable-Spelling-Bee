@@ -1,11 +1,8 @@
 import pygame
-from PIL import Image, ImageEnhance
-import os
 import math
 from bear_maze.maze import mazes
 import random
 import time
-# from spelling_bee.game import SpellingBeeGame
 
 SCREEN_HEIGHT = 1080
 SCREEN_WIDTH = 1920
@@ -13,12 +10,11 @@ FONT_SIZE = 24
 FPS = 60
 LEVEL = mazes
 COLOR = "chartreuse3"
-SECONDARY_COLOR = "chartreuse4"
 COLOR2 = "black"
 PI = math.pi
 BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bear_still.png'), (45,45))
 ANGRY_BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/angry_bear.png'), (45,45))
-MINUS_ONE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/minus_one.png'), (45,45))
+MINUS_ONE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/minus_one.png'), (30,30))
 GRASS_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/grass_block.png'), (64,32))
 GRASS = 0
 V1_ROCK_OBSTACLE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/rock_obstacle_1.png'), (64,32))
@@ -58,34 +54,34 @@ BEAR_START_Y = 300
 TILE_HEIGHT = ((SCREEN_HEIGHT  - 50) // 32) # = 32
 TILE_WIDTH = (SCREEN_WIDTH // 30) # = 64
 C9_FUDGE_FACTOR = 32
-BEAR_SPEED = 8
-BEE_SPEED = 5
+BEAR_SPEED = 10
+BEE_SPEED = 7
 BRIGHTNESS_FACTOR = 0.5
 
 ENEMY_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/angry_bee.png'), (30,30))
 FLIPPED_ENEMY_IMAGE = pygame.transform.flip(ENEMY_IMAGE, True, False)
 
 class Bee:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.speed = BEE_SPEED
-        self.movingRight = True  # Initialize moving direction
+  def __init__(self, x, y):
+    self.x = x
+    self.y = y
+    self.speed = BEE_SPEED
+    self.movingRight = True  # Initialize moving direction
 
-    def move(self):
-      # Check if the object should move right
-      if self.movingRight:
-        # Check if the object is within the right limit
-        if self.x < SCREEN_WIDTH - 300:
-          self.x += self.speed  # Move right
-        else:
-          self.movingRight = False  # Change direction to left
+  def move(self):
+    # Check if the object should move right
+    if self.movingRight:
+      # Check if the object is within the right limit
+      if self.x < SCREEN_WIDTH - 450:
+        self.x += self.speed  # Move right
       else:
-        # Check if the object is within the left limit
-        if self.x > 350:
-          self.x -= self.speed  # Move left
-        else:
-          self.movingRight = True  # Change direction to right
+        self.movingRight = False  # Change direction to left
+    else:
+      # Check if the object is within the left limit
+      if self.x > 350:
+        self.x -= self.speed  # Move left
+      else:
+        self.movingRight = True  # Change direction to right
 
 class BearMazeGame:
   def __init__(self, number_of_bees, number_of_honey_jars): 
@@ -94,7 +90,7 @@ class BearMazeGame:
     self.screen_height = SCREEN_WIDTH
     self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     self.timer = pygame.time.Clock()
-    self.running = True
+    self.maze_running = True
     self.bear_x = BEAR_START_X
     self.bear_y = BEAR_START_Y
     # Starting direction for bear
@@ -104,7 +100,6 @@ class BearMazeGame:
     self.goal_tile = []
     self.number_of_bees = number_of_bees
     self.number_of_honey_jars = number_of_honey_jars
-    # self.load_assests()
     # List to hold bee objects
     self.bees = []
     # Spawn bees at initial positon
@@ -116,12 +111,6 @@ class BearMazeGame:
     self.angry_timer = 0
     self.angry_duration = 3
 
-  def load_assests(self):
-    print("load assets") 
-    # raw_image = pygame.image.load(os.path.join("assests", "images", "background.png"))
-    # self.background_image = pygame.transform.scale(raw_image, (self.screen_width, self.screen_height))
-    # self.font = pygame.font.Font(os.path.join("assests", "fonts", "OpenSans-Regular.ttf"), FONT_SIZE)
-  
   def draw_maze(self, level):
     for i in range(len(level)):
       for j in range(len(level[i])):
@@ -131,17 +120,17 @@ class BearMazeGame:
           self.screen.blit(CAVE_SIGN_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
           self.goal_tile.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
         elif level[i][j] == ARROW_UP:
-           self.screen.blit(ARROW_UP_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
-           self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
+          self.screen.blit(ARROW_UP_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+          self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
         elif level[i][j] == ARROW_RIGHT:
-           self.screen.blit(ARROW_RIGHT_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
-           self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
+          self.screen.blit(ARROW_RIGHT_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+          self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
         elif level[i][j] == ARROW_DOWN:
-           self.screen.blit(ARROW_DOWN_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
-           self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
+          self.screen.blit(ARROW_DOWN_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+          self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
         elif level[i][j] == ARROW_LEFT:
-            self.screen.blit(ARROW_LEFT_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
-            self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
+          self.screen.blit(ARROW_LEFT_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
+          self.clickable_arrow_keys.append(pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
         elif level[i][j] == V1_ROCK_OBSTACLE:
           self.screen.blit(V1_ROCK_OBSTACLE_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
         elif level[i][j] == V2_ROCK_OBSTACLE:
@@ -154,16 +143,16 @@ class BearMazeGame:
           self.screen.blit(WOOD_LOG_OBSTACLE_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
         elif level[i][j] == MENU_SCREEN:
           pygame.draw.rect(self.screen, COLOR2, pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
-        
+
   def draw_bear(self):
     if time.time() - self.angry_timer < self.angry_duration:
-      self.screen.blit(MINUS_ONE_IMAGE, (self.bear_x, self.bear_y - MINUS_ONE_IMAGE.get_height()))
+      self.screen.blit(MINUS_ONE_IMAGE, (self.bear_x + 35, self.bear_y - MINUS_ONE_IMAGE.get_height()))
       self.screen.blit(ANGRY_BEAR_IMAGE, (self.bear_x, self.bear_y))
     else:
       self.screen.blit(BEAR_IMAGE, (self.bear_x, self.bear_y))
 
   def create_bees(self, number_of_bees):
-    # Spwan bees at random locations
+    # Spawn bees at random locations
     number_of_bees = 4
     for _ in range(number_of_bees):
       random_x = random.randint(400, 1000) 
@@ -190,20 +179,21 @@ class BearMazeGame:
         bee_index = self.bee_rects.index(bee_rect)
         del self.bees[bee_index]
         del self.bee_rects[bee_index]
+        self.number_of_bees -= 1
         # decrease honey jar number
         self.number_of_honey_jars -= 1
         self.angry_timer = time.time()
-        print(self.number_of_honey_jars)
         if (self.number_of_honey_jars <= 0):
           self.end_game("lost")
-            
 
   def end_game(self, game_state):
     if game_state == "won":
       print("you win")
     elif game_state == "lost":
       print("you lose")
-    
+
+    self.maze_running = False
+
   def check_position(self, level):
     # R, L, U, D
     turns = [False, False, False, False]
@@ -261,13 +251,29 @@ class BearMazeGame:
     elif self.direction == DOWN and turns_allowed[3]:
       bear_y += BEAR_SPEED
     return bear_x, bear_y
+
+  def draw_counters(self):
+    jar_msg = f"Number of Jars: {self.number_of_honey_jars}"
+    bee_msg = f"Number of Bees: {self.number_of_bees}"
     
+    font = pygame.font.Font(None, 36)
+    
+    jar_surface = font.render(jar_msg, True, (0, 0, 0))
+    bee_surface = font.render(bee_msg, True, (0, 0, 0))
+    
+    jar_background_rect  = pygame.draw.rect(self.screen, COLOR, pygame.Rect((5 * TILE_WIDTH, 6 * TILE_HEIGHT, 3.7 * TILE_WIDTH, TILE_HEIGHT)))
+    bee_background_rect  = pygame.draw.rect(self.screen, COLOR, pygame.Rect((21.3 * TILE_WIDTH, 6 * TILE_HEIGHT, 3.7 * TILE_WIDTH, TILE_HEIGHT)))
+    
+    self.screen.blit(jar_surface, (jar_background_rect.x + 10, jar_background_rect.y + 5))
+    self.screen.blit(bee_surface, (bee_background_rect.x + 10, bee_background_rect.y + 5))
+        
   def run(self):
-    while self.running:
+    while self.maze_running:
       direction = None
       self.timer.tick(FPS)
       self.screen.fill(COLOR)
       self.draw_maze(LEVEL)
+      self.draw_counters()
       self.draw_bear()
       self.update_bees_position()
       self.draw_bees()
@@ -283,8 +289,8 @@ class BearMazeGame:
       turns_allowed = self.check_position(LEVEL)
       for event in pygame.event.get():
         if event.type == pygame.QUIT: 
-          self.running = False
-      
+          self.maze_running = False
+
       keys = pygame.key.get_pressed()
       if keys[pygame.K_w]:
         self.screen.blit(DARK_ARROW_UP_IMAGE, (self.clickable_arrow_keys[0].left, self.clickable_arrow_keys[0].top))
@@ -298,7 +304,7 @@ class BearMazeGame:
       if keys[pygame.K_s]:
         self.screen.blit(DARK_ARROW_DOWN_IMAGE, (self.clickable_arrow_keys[3].left, self.clickable_arrow_keys[3].top))
         direction = DOWN
-      
+
       mouse = pygame.mouse.get_pressed()
       if mouse[LEFT_MOUSE_BUTTON]:
         position = pygame.mouse.get_pos()
@@ -321,5 +327,5 @@ class BearMazeGame:
           self.bear_x, self.bear_y = self.move_bear(self.bear_x, self.bear_y, turns_allowed)
 
       pygame.display.flip()
-    
+
     pygame.quit()
