@@ -13,6 +13,8 @@ COLOR = "chartreuse3"
 COLOR2 = "black"
 PI = math.pi
 BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bear_still.png'), (45,45))
+TUTORIAL_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/tutorial.png'), (1000,600))
+HELP_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/help.png'), (45,45))
 ANGRY_BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/angry_bear.png'), (45,45))
 MINUS_ONE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/minus_one.png'), (45,45))
 GRASS_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/grass_block.png'), (64,32))
@@ -108,6 +110,7 @@ class BearMazeGame:
     self.bee_rects = [pygame.Rect(bee.x, bee.y, ENEMY_IMAGE.get_width(), ENEMY_IMAGE.get_height()) for bee in self.bees]
     self.angry_timer = 0
     self.angry_duration = 3
+    
 
   def draw_maze(self, level):
     for i in range(len(level)):
@@ -154,7 +157,7 @@ class BearMazeGame:
     number_of_bees = 4
     for _ in range(number_of_bees):
       random_x = random.randint(400, 1000) 
-      random_y = random.randint(200, 800) 
+      random_y = random.randint(300, 800) 
       bee = Bee(random_x, random_y)
       self.bees.append(bee)
   
@@ -265,6 +268,22 @@ class BearMazeGame:
     self.screen.blit(jar_surface, (jar_background_rect.x + 10, jar_background_rect.y + 5))
     self.screen.blit(bee_surface, (bee_background_rect.x + 10, bee_background_rect.y + 5))
         
+  def draw_help_button(self):
+    margin = 5  # Space between the bottom of the counter and the top of the help button
+    # Calculate the x-coordinate based on the counter's position and potentially its width if needed
+    help_button_x = 24.3 * TILE_WIDTH
+    # Assuming the counter's height is TILE_HEIGHT, calculate the y-coordinate to place the button below it
+    help_button_y = (6 * TILE_HEIGHT + TILE_HEIGHT) + margin  # Just below the "Number of Bees" rectangle
+
+    self.screen.blit(HELP_IMAGE, (help_button_x, help_button_y))
+    self.help_button_rect = HELP_IMAGE.get_rect(topleft=(help_button_x, help_button_y))
+
+  def draw_tutorial(self):
+    tutorial_x = (SCREEN_WIDTH - TUTORIAL_IMAGE.get_width()) // 2
+    tutorial_y = (SCREEN_HEIGHT - TUTORIAL_IMAGE.get_height()) // 2
+    self.screen.blit(TUTORIAL_IMAGE, (tutorial_x, tutorial_y))
+  
+  
   def run(self):
     while self.maze_running:
       direction = None
@@ -275,6 +294,9 @@ class BearMazeGame:
       self.draw_bear()
       self.update_bees_position()
       self.draw_bees()
+      self.draw_help_button()
+      
+      
       # Update bear and bee Rect objects
       self.bear_rect.update(self.bear_x, self.bear_y, BEAR_IMAGE.get_width(), BEAR_IMAGE.get_height())
       self.bee_rects = [pygame.Rect(bee.x, bee.y, ENEMY_IMAGE.get_width(), ENEMY_IMAGE.get_height()) for bee in self.bees]
@@ -318,6 +340,11 @@ class BearMazeGame:
         elif self.clickable_arrow_keys[3].collidepoint(position):
           self.screen.blit(DARK_ARROW_DOWN_IMAGE, (self.clickable_arrow_keys[3].left, self.clickable_arrow_keys[3].top))
           direction = DOWN
+        if self.help_button_rect.collidepoint(position):
+          # Your help game logic here
+          print("Help button clicked")  # Placeholder action
+          self.draw_tutorial()
+
 
       for i in range(len(turns_allowed)):
         if direction == i and turns_allowed[i]:
