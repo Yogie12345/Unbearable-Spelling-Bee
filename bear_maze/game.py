@@ -14,7 +14,7 @@ COLOR2 = "black"
 PI = math.pi
 BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bear_still.png'), (45,45))
 TUTORIAL_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/tutorial.png'), (1000,600))
-HELP_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/help.png'), (45,45))
+HELP_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/help.png'), (60,60))
 ANGRY_BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/angry_bear.png'), (45,45))
 MINUS_ONE_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/minus_one.png'), (45,45))
 GRASS_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/grass_block.png'), (64,32))
@@ -271,7 +271,7 @@ class BearMazeGame:
   def draw_help_button(self):
     margin = 5  # Space between the bottom of the counter and the top of the help button
     # Calculate the x-coordinate based on the counter's position and potentially its width if needed
-    help_button_x = 24.3 * TILE_WIDTH
+    help_button_x = 5 * TILE_WIDTH
     # Assuming the counter's height is TILE_HEIGHT, calculate the y-coordinate to place the button below it
     help_button_y = (6 * TILE_HEIGHT + TILE_HEIGHT) + margin  # Just below the "Number of Bees" rectangle
 
