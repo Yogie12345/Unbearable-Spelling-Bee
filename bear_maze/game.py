@@ -14,6 +14,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 GOLD = (255, 215, 0)
+RED = (255, 0, 0)
 PI = math.pi
 BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bear_still.png'), (45,45))
 TUTORIAL_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/tutorial.png'), (1000,600))
@@ -201,7 +202,7 @@ class BearMazeGame:
       else:
         self.show_popup("Congratulations! You have completed the maze, but you still need to collect more honey!", ["Continue"], "ongoing")
     elif game_state == "lost":
-      self.show_popup("Oh no! You lost all your honey! Collect some more and try again!", ["Continue"], "ongoing")
+      self.show_popup("Oh no! You lost all your honey! Collect some more and try again!", ["Continue"], "failed")
     self.maze_running = False
     
   def show_popup(self, message, buttons, state):
@@ -209,9 +210,12 @@ class BearMazeGame:
     if state == "ongoing":
       font_colour = GRAY
       background_colour = WHITE
-    else:
+    elif state == "complete":
       font_colour = GOLD
       background_colour = BLACK
+    else:
+      font_colour = RED
+      background_colour = WHITE
     popup_text = popup_font.render(message, True, font_colour)
     popup_rect = popup_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
     popup_background = pygame.Surface((popup_rect.width + 20, popup_rect.height + 20))
