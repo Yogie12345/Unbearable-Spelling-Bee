@@ -1,6 +1,8 @@
 import pygame
 import sys
 from bear_maze.game import BearMazeGame
+import os
+from spelling_bee.game import SpellingBeeGame
 
 pygame.init()
 
@@ -10,7 +12,7 @@ pygame.display.set_caption("Unbearable Spelling Bees!")
 
 #Image Section
 BACKGROUND = pygame.transform.scale(pygame.image.load("background.jpg"), (screenWidth, screen_height))
-LOGO = pygame.image.load("logo.png")
+LOGO = pygame.image.load("assets/logo.png")
 START_BUTTON_NORMAL = pygame.image.load("Buttons/playbutton.png").convert_alpha()
 START_BUTTON_HOVER = pygame.image.load("Buttons/playbutton_sel.png").convert_alpha()
 QUIT_BUTTON_NORMAL = pygame.image.load("Buttons/quitbutton.png").convert_alpha()
@@ -23,8 +25,6 @@ BACK_BUTTON_NORMAL = pygame.image.load("Buttons/backbutton.png").convert_alpha()
 BACK_BUTTON_HOVER = pygame.image.load("Buttons/backbutton_sel.png").convert_alpha()
 TUTORIAL_BUTTON_NORMAL = pygame.image.load("Buttons/tutorialbutton.png").convert_alpha()
 TUTORIAL_BUTTON_HOVER = pygame.image.load("Buttons/tutorialbutton_sel.png").convert_alpha()
-STARTING_NUMBER_OF_BEES = 3
-STARTING_NUMBER_OF_HONEY_JARS = 3
 BUTTON_WIDTH, BUTTON_HEIGHT = 200, 50
 
 #Font Section
@@ -124,15 +124,20 @@ def draw_difficulty_selection():
   else:
     screen.blit(BACK_BUTTON_NORMAL, back_button_rect.topleft)
 
-def start_game(): 
-  game = BearMazeGame(STARTING_NUMBER_OF_BEES, STARTING_NUMBER_OF_HONEY_JARS)
-  game.run()
+def start_game(level):
+  total_number_of_honey = 0
+  while total_number_of_honey < 11:
+    spelling_game = SpellingBeeGame(level)
+    spelling_game.run()
+    maze_game = BearMazeGame(spelling_game.honey_bee_count, spelling_game.honey_jar_count, total_number_of_honey)
+    maze_game.run()
+    total_number_of_honey += maze_game.number_of_honey_jars
 
 running = True
 while running:
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
-      running = False
+      exit()
     elif event.type == pygame.MOUSEBUTTONDOWN:
       mouse_x, mouse_y = pygame.mouse.get_pos()
       if state == MENU:
@@ -145,9 +150,9 @@ while running:
         if back_button_rect.collidepoint(mouse_x, mouse_y):
           state = MENU
         elif check_button_hover(easy_button_x, easy_button_y, mouse_x, mouse_y):
-          start_game()
+          start_game(4)
         elif check_button_hover(hard_button_x, hard_button_y, mouse_x, mouse_y):
-          start_game()
+          start_game(5)
     elif event.type == pygame.VIDEORESIZE:
       screenWidth, screen_height = event.size
       screen = pygame.display.set_mode((screenWidth, screen_height), pygame.RESIZABLE)

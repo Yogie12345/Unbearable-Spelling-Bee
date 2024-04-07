@@ -10,7 +10,9 @@ FONT_SIZE = 36
 FPS = 60
 LEVEL = mazes
 COLOR = "chartreuse3"
-COLOR2 = "black"
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GRAY = (128, 128, 128)
 PI = math.pi
 BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bear_still.png'), (45,45))
 TUTORIAL_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/tutorial.png'), (1000,600))
@@ -60,7 +62,8 @@ BEAR_SPEED = 10
 BEE_SPEED = 7
 ENEMY_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/angry_bee.png'), (30,30))
 FLIPPED_ENEMY_IMAGE = pygame.transform.flip(ENEMY_IMAGE, True, False)
-
+MINIMUM_NUMBER_OF_BEES = 3
+MAXIMUM_NUMBER_OF_BEES = 8
 class Bee:
   def __init__(self, x, y):
     self.x = x
@@ -84,7 +87,7 @@ class Bee:
         self.movingRight = True  # Change direction to right
 
 class BearMazeGame:
-  def __init__(self, number_of_bees, number_of_honey_jars): 
+  def __init__(self, number_of_bees, number_of_honey_jars, total_number_of_honey): 
     pygame.init()
     self.screen_width = SCREEN_HEIGHT
     self.screen_height = SCREEN_WIDTH
@@ -98,18 +101,22 @@ class BearMazeGame:
     # Order will always be U, L, R, D
     self.clickable_arrow_keys = []
     self.goal_tile = []
-    self.number_of_bees = number_of_bees
+    if (MINIMUM_NUMBER_OF_BEES + number_of_bees) > MAXIMUM_NUMBER_OF_BEES:
+      self.number_of_bees = MAXIMUM_NUMBER_OF_BEES
+    else:
+      self.number_of_bees = MINIMUM_NUMBER_OF_BEES + number_of_bees
     self.number_of_honey_jars = number_of_honey_jars
     # List to hold bee objects
     self.bees = []
     # Spawn bees at initial position
-    self.create_bees(number_of_bees)
+    self.create_bees(self.number_of_bees)
     # Create Rect object for bear
     self.bear_rect = pygame.Rect(self.bear_x, self.bear_y, BEAR_IMAGE.get_width(), BEAR_IMAGE.get_height())
     # Create Rect objects for bees
     self.bee_rects = [pygame.Rect(bee.x, bee.y, ENEMY_IMAGE.get_width(), ENEMY_IMAGE.get_height()) for bee in self.bees]
     self.angry_timer = 0
     self.angry_duration = 3
+    self.total_number_of_honey = total_number_of_honey
     
 
   def draw_maze(self, level):
@@ -143,7 +150,7 @@ class BearMazeGame:
         elif level[i][j] == WOOD_LOG_OBSTACLE:
           self.screen.blit(WOOD_LOG_OBSTACLE_IMAGE, (j * TILE_WIDTH, i * TILE_HEIGHT))
         elif level[i][j] == MENU_SCREEN:
-          pygame.draw.rect(self.screen, COLOR2, pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
+          pygame.draw.rect(self.screen, BLACK, pygame.Rect((j * TILE_WIDTH, i * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)))
 
   def draw_bear(self):
     if time.time() - self.angry_timer < self.angry_duration:
@@ -153,8 +160,6 @@ class BearMazeGame:
       self.screen.blit(BEAR_IMAGE, (self.bear_x, self.bear_y))
 
   def create_bees(self, number_of_bees):
-    # Spawn bees at random locations
-    number_of_bees = 4
     for _ in range(number_of_bees):
       random_x = random.randint(400, 1000) 
       random_y = random.randint(300, 800) 
@@ -189,11 +194,48 @@ class BearMazeGame:
 
   def end_game(self, game_state):
     if game_state == "won":
-      print("you win")
+      if self.total_number_of_honey < 11:
+        self.show_popup("Congratulations! You have completed the maze and you've collected enough honey for the winter!", ["Continue"])
+      else:
+        self.show_popup("Congratulations! You have completed the maze, but you still need to collect more honey!", ["Continue"])
     elif game_state == "lost":
-      print("you lose")
-
+      self.show_popup("Oh no! You lost all your honey! Collect some more and try again!", ["Continue"])
     self.maze_running = False
+    
+  def show_popup(self, message, buttons):
+    popup_font = pygame.font.Font(None, FONT_SIZE)
+    popup_text = popup_font.render(message, True, GRAY)
+    popup_rect = popup_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    popup_background = pygame.Surface((popup_rect.width + 20, popup_rect.height + 20))
+    popup_background.fill(WHITE)
+    popup_background_rect = popup_background.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        
+    self.screen.blit(popup_background, popup_background_rect)
+    self.screen.blit(popup_text, popup_rect)
+
+    button_font = pygame.font.Font(None, FONT_SIZE)
+    button_width, button_height = 130, 35
+    button_x = (SCREEN_WIDTH - button_width) // 2
+    button_y = popup_rect.bottom + 20
+
+    for button_text in buttons:
+      button_surface = button_font.render(button_text, True, BLACK)
+      button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
+      pygame.draw.rect(self.screen, WHITE, button_rect)
+      self.screen.blit(button_surface, button_rect.topleft)
+      button_x += button_width + 20
+
+    pygame.display.flip()
+
+    while True:
+      for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+          pygame.quit()
+          quit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+          mouse_pos = pygame.mouse.get_pos()
+          if button_rect.collidepoint(mouse_pos):
+            return
 
   def check_position(self, level):
     # R, L, U, D
@@ -309,7 +351,7 @@ class BearMazeGame:
       turns_allowed = self.check_position(LEVEL)
       for event in pygame.event.get():
         if event.type == pygame.QUIT: 
-          self.maze_running = False
+          quit()
 
       keys = pygame.key.get_pressed()
       if keys[pygame.K_w]:
@@ -341,8 +383,6 @@ class BearMazeGame:
           self.screen.blit(DARK_ARROW_DOWN_IMAGE, (self.clickable_arrow_keys[3].left, self.clickable_arrow_keys[3].top))
           direction = DOWN
         if self.help_button_rect.collidepoint(position):
-          # Your help game logic here
-          print("Help button clicked")  # Placeholder action
           self.draw_tutorial()
 
 
@@ -352,5 +392,3 @@ class BearMazeGame:
           self.bear_x, self.bear_y = self.move_bear(self.bear_x, self.bear_y, turns_allowed)
 
       pygame.display.flip()
-
-    pygame.quit()
