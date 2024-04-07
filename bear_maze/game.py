@@ -13,6 +13,7 @@ COLOR = "chartreuse3"
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
+GOLD = (255, 215, 0)
 PI = math.pi
 BEAR_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/bear_still.png'), (45,45))
 TUTORIAL_IMAGE = pygame.transform.scale(pygame.image.load(f'assets/images/maze_images/tutorial.png'), (1000,600))
@@ -194,34 +195,41 @@ class BearMazeGame:
 
   def end_game(self, game_state):
     if game_state == "won":
-      if self.total_number_of_honey < 11:
-        self.show_popup("Congratulations! You have completed the maze and you've collected enough honey for the winter!", ["Continue"])
+      self.total_number_of_honey += self.number_of_honey_jars
+      if self.total_number_of_honey >= 10:
+        self.show_popup("Congratulations! You have completed the maze and you've collected enough honey for the winter!", ["Continue"], "complete")
       else:
-        self.show_popup("Congratulations! You have completed the maze, but you still need to collect more honey!", ["Continue"])
+        self.show_popup("Congratulations! You have completed the maze, but you still need to collect more honey!", ["Continue"], "ongoing")
     elif game_state == "lost":
-      self.show_popup("Oh no! You lost all your honey! Collect some more and try again!", ["Continue"])
+      self.show_popup("Oh no! You lost all your honey! Collect some more and try again!", ["Continue"], "ongoing")
     self.maze_running = False
     
-  def show_popup(self, message, buttons):
+  def show_popup(self, message, buttons, state):
     popup_font = pygame.font.Font(None, FONT_SIZE)
-    popup_text = popup_font.render(message, True, GRAY)
+    if state == "ongoing":
+      font_colour = GRAY
+      background_colour = WHITE
+    else:
+      font_colour = GOLD
+      background_colour = BLACK
+    popup_text = popup_font.render(message, True, font_colour)
     popup_rect = popup_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
     popup_background = pygame.Surface((popup_rect.width + 20, popup_rect.height + 20))
-    popup_background.fill(WHITE)
+    popup_background.fill(background_colour)
     popup_background_rect = popup_background.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
         
     self.screen.blit(popup_background, popup_background_rect)
     self.screen.blit(popup_text, popup_rect)
 
     button_font = pygame.font.Font(None, FONT_SIZE)
-    button_width, button_height = 130, 35
+    button_width, button_height = 120, 35
     button_x = (SCREEN_WIDTH - button_width) // 2
     button_y = popup_rect.bottom + 20
 
     for button_text in buttons:
-      button_surface = button_font.render(button_text, True, BLACK)
+      button_surface = button_font.render(button_text, True, font_colour)
       button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
-      pygame.draw.rect(self.screen, WHITE, button_rect)
+      pygame.draw.rect(self.screen, background_colour, button_rect)
       self.screen.blit(button_surface, button_rect.topleft)
       button_x += button_width + 20
 
