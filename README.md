@@ -7,5 +7,6 @@ System Requirements:
 Project Execution:
 - Open up command prompt
 - Run `git clone https://github.com/Yogie12345/Unbearable-Spelling-Bee.git`
+- Run `cd unbearable-spelling-bee`
 - Run `pip install -r requirements.txt`
 - Run `python ./mainmenu.py`
